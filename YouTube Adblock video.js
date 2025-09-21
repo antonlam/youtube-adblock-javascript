@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Youtube Adblock v4
+// @name         Youtube Adblock v3
 // @namespace    http://tampermonkey.net/
-// @version      2025-03-28
-// @description  Youtube Adblock v4
+// @version      2025-05-09
+// @description  Youtube Adblock v3
 // @author       Anton
 // @match        *://*.youtube.com/*
 // @exclude      *://accounts.youtube.com/*
@@ -13,12 +13,18 @@
 // @license MIT
 // ==/UserScript==
 
+var url = "";
+var video;
+var videoTime = 0;
+var videoInfo = {
+    "time" : 0,
+    "status" : '',
+    "speed" : 1.0,
+    "quality" : '',
+    "mode" : '',
+};
 
-const minExecutionDelay = 200;
-const maxExecutionDelay = 300;
-const randomExecutionDelay = Math.floor(Math.random() * (maxExecutionDelay - minExecutionDelay + 1)) + minExecutionDelay;
-
-var cssArrObject = [
+const cssArrObject = [
         `#masthead-ad`,
         `ytd-rich-item-renderer.style-scope.ytd-rich-grid-row #content:has(.ytd-display-ad-renderer)`,
         `.video-ads.ytp-ad-module`,
@@ -35,9 +41,7 @@ var cssArrObject = [
     ];
 
 (function() {
-    let video;
-    let videoTime;
-    let mainVideoTime = 0;
+    'use strict';
     window.dev=false;
 
     function removeNonVideoAds(arry) {
@@ -67,49 +71,30 @@ var cssArrObject = [
         style.appendChild(document.createTextNode(arry.join(` `)));
     }
 
-    function debounce(func, wait) {
-        let timeout;
-        return function (...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    }
+    function skipAd(adsVideo) {
+        const adIndicator = document.querySelector(
+            '.ytp-ad-skip-button, .ytp-skip-ad-button, .ytp-ad-skip-button-modern, ' +
+            '.video-ads.ytp-ad-module .ytp-ad-player-overlay, .ytp-ad-button-icon'
+        );
 
-    function removeVideoAds(id) {
-        let video = document.querySelector('.ad-showing video');
-        if (!video) {
-            new MutationObserver(debounce(() => {
-                video = document.querySelector('.ad-showing video');
-                if (video) {
-                    //setupAdObserver(video);
-                    this.disconnect();
-                }
-            }, 500)).observe(document.body, { childList: true, subtree: true });
-            return;
+        if (adIndicator && !window.location.href.includes('https://m.youtube.com/')) {
+            adsVideo.muted = true;
+            adsVideo.currentTime = adsVideo.duration - 0.1;
+            adsVideo.play();
         }
-        const targetNode = document.querySelector('.video-player-container') || document.body;
-        const config = { childList: true, subtree: true };
-
-        const observer = new MutationObserver(debounce(() => {
-            const skipButton = document.querySelector('.ytp-ad-skip-button, .ytp-skip-ad-button, .ytp-ad-skip-button-modern');
-            const shortAdMsg = document.querySelector('.video-ads.ytp-ad-module .ytp-ad-player-overlay, .ytp-ad-button-icon');
-            if ((skipButton || shortAdMsg) && !window.location.href.includes('https://m.youtube.com/')) {
-                video.muted = true;
-                video.currentTime = video.duration;
-            }
-            observer.disconnect();
-        }, 100));
-
-        observer.observe(targetNode, config);
     }
-    setInterval(() => {
+
+    const mainFunc = setInterval(() => {
+        video = document.getElementById("movie_player") || document.getElementsByClassName("html5-video-player")[0];
         if (document.readyState !== 'loading') {
             window.addEventListener('beforeunload', () => {
                 window.localStorage.setItem('lastUrl', window.location.href);
             }, { once: true });
+            let adsVideo = document.querySelector('.ad-showing video');
             removeNonVideoAds(cssArrObject);
-            removeVideoAds('removeVideoAds');
+            //url = window.location.href;
+            skipAd(adsVideo);
         }
-    }, 500);
+    }, 100);
 
 })();
