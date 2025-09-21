@@ -1,8 +1,15 @@
 // ==UserScript==
+<<<<<<< HEAD
 // @name         Youtube Adblock v3
 // @namespace    http://tampermonkey.net/
 // @version      2025-05-09
 // @description  Youtube Adblock v3
+=======
+// @name         Youtube Adblock v2
+// @namespace    http://tampermonkey.net/
+// @version      2025-03-28
+// @description  Youtube Adblock v2
+>>>>>>> 3f7c56e828a06e8a4368d1c2ca1d121243db47e9
 // @author       Anton
 // @match        *://*.youtube.com/*
 // @exclude      *://accounts.youtube.com/*
