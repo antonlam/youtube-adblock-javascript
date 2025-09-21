@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Youtube Adblock v4
+// @name         Youtube Adblock v2
 // @namespace    http://tampermonkey.net/
 // @version      2025-03-28
 // @description  Youtube Adblock v4
