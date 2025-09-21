@@ -10,7 +10,7 @@ A powerful collection of Tampermonkey userscripts that enhance your YouTube expe
 ### 1. YouTube Adblock v4 (`YouTube Adblock video.js`)
 Blocks YouTube ads, removes various advertising elements, and automatically dismisses adblock warning popups.
 
-### 2. Display Info v3 (`Display-Info.js`)
+### 2. Display Info v4 (`Display-Info.js`)
 Displays real-time video information and provides auto-play functionality with persistent settings.
 
 ## Combined Features
@@ -25,10 +25,10 @@ Displays real-time video information and provides auto-play functionality with p
 ## Installation
 
 ### Prerequisites
-- **Tampermonkey** browser extension installed
+- **Tampermonkey / Userscript** browser extension installed
   - [Chrome/Edge](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
   - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
-  - [Safari](https://apps.apple.com/us/app/tampermonkey/id1482490089)
+  - [Safari](https://apps.apple.com/us/app/tampermonkey/id1482490089](https://apps.apple.com/us/app/userscripts/id1463298887 )
 
 ### Setup Instructions
 
@@ -42,7 +42,7 @@ Displays real-time video information and provides auto-play functionality with p
 7. Navigate to YouTube and enjoy enhanced viewing!
 
 #### Method 2: Bulk Installation
-1. Install Tampermonkey extension
+1. Install Tampermonkey / Userscript extension
 2. Open Tampermonkey dashboard
 3. Click "Create a new script" for each file
 4. Copy and paste both scripts
@@ -79,7 +79,7 @@ Displays real-time video information and provides auto-play functionality with p
 - Companion advertisements (`ytm-companion-ad-renderer`)
 - Related video ads (`#related #player-ads`)
 
-### Display Info v3 Features
+### Display Info v4 Features
 
 #### Information Display
 - **Current Time**: Shows video timestamp in MM:SS format
@@ -230,7 +230,7 @@ MIT License - Feel free to use, modify, and distribute as needed.
   - Optimized performance with 500ms update intervals
 
 ### Version 4.0 (Previous Release)
-- **Display Info v3**:
+- **Display Info v4**:
   - Real-time video information display with XPath targeting
   - Auto-play functionality with persistent localStorage settings
   - Improved visual design with dark theme and flexbox layout
