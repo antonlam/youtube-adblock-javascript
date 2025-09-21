@@ -1,259 +1,231 @@
 // ==UserScript==
-// @name         Display Info v2
+// @name         Display Info v3
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Store and get YouTube common info
-// @author       Anton
+// @version      2025-06-24
+// @description  Store and get YouTube common info; panel near Subscribe/top-row
 // @match        https://www.youtube.com/*
+// @run-at       document-idle
 // @grant        none
 // ==/UserScript==
 
 (function() {
     'use strict';
-
+  
     let previousUrl = '';
     let alwaysPlay = localStorage.getItem('alwaysPlay') === 'true';
     let hasFirstUntickOccurred = localStorage.getItem('hasFirstUntickOccurred') === 'true';
-
-    var videoInfo = {
-        "url": "",
-        "time": 0,
-        "status": '',
-        "speed": 1.0,
-        "quality": '',
-        "mode": '',
-    };
-
-    function containerInfoBlk(targetXPath, player, setting) {
-        const targetElement = document.evaluate(
-            targetXPath,
-            document,
-            null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue;
-
-        if (targetElement) {
-            let div = targetElement.querySelector('div[data-custom-text="video-time"]');
-            if (!div) {
-                div = document.createElement('div');
-                div.setAttribute('data-custom-text', 'video-time');
-                div.style.padding = '10px';
-                div.style.color = '#ffffff';
-                div.style.backgroundColor = "#121212";
-                div.style.border = '1px solid grey';
-                div.style.width = "50%";
-                div.style.whiteSpace = "pre";
-                div.style.borderRadius = "10px";
-                div.style.marginLeft = "2%";
-                div.style.display = "flex";
-                div.style.alignItems = "center";
-                div.style.gap = "10px";
-
-                const textSpan = document.createElement('span');
-                textSpan.setAttribute('data-custom-text', 'video-info');
-                div.appendChild(textSpan);
-
-                const radioLabel = document.createElement('label');
-                radioLabel.style.color = '#ffffff';
-                radioLabel.style.display = 'flex';
-                radioLabel.style.alignItems = 'center';
-                radioLabel.style.cursor = 'pointer';
-
-                const radioInput = document.createElement('input');
-                radioInput.type = 'checkbox';
-                radioInput.style.marginRight = '5px';
-                radioInput.checked = alwaysPlay; // Initialize with localStorage value
-
-                const radioText = document.createTextNode('Always Play');
-                radioLabel.appendChild(radioInput);
-                radioLabel.appendChild(radioText);
-
-                // Update alwaysPlay state and localStorage on change
-                radioInput.addEventListener('change', () => {
-                    alwaysPlay = radioInput.checked;
-                    /*
-                    localStorage.setItem('alwaysPlay', alwaysPlay);
-                    if (alwaysPlay) {
-                        localStorage.setItem('hasFirstUntickOccurred', 'false');
-                    }*/
-                });
-
-                div.appendChild(radioLabel);
-                targetElement.appendChild(div);
-            }
-
-            const textSpan = div.querySelector('span[data-custom-text="video-info"]');
-            let quality = "", status = "";
-            const minutes = Math.floor(setting.time / 60);
-            const seconds = Math.floor(setting.time % 60);
-
-            if (player && player.getPlaybackQuality) {
-                const qualityMap = {
-                    'tiny': '144p',
-                    'small': '240p',
-                    'medium': '360p',
-                    'large': '480p',
-                    'hd720': '720p',
-                    'hd1080': '1080p',
-                    'hd1440': '1440p',
-                    'hd2160': '2160p',
-                    'highres': '4320p'
-                };
-                quality = qualityMap[setting.quality] || setting.quality;
-            }
-            status = setting.status ? "Is Playing" : "Is Paused";
-            textSpan.textContent = `Time: ${minutes}:${seconds} - ${status} - Speed: ${setting.speed}x\nResolution: ${quality} - Mode: ${setting.mode}`;
-            return true;
-        }
-        return false;
+  
+    const QUALITY_MAP = { tiny:'144p', small:'240p', medium:'360p', large:'480p',
+      hd720:'720p', hd1080:'1080p', hd1440:'1440p', hd2160:'2160p', highres:'4320p' };
+  
+    // Resolve preferred anchors in priority order
+    function resolveAnchor(player) {
+      // 1) Subscribe button area inside owner renderer
+      const subscribeBtn =
+        document.querySelector('ytd-video-owner-renderer #subscribe-button, ytd-watch-metadata #subscribe-button');
+      if (subscribeBtn) return { el: subscribeBtn, mode: 'after-subscribe' };
+  
+      // 2) Top row of watch metadata
+      const topRow = document.querySelector('ytd-watch-metadata #top-row');
+      if (topRow) return { el: topRow, mode: 'in-top-row' };
+  
+      // 3) Middle row of watch metadata (fallback within metadata)
+      const middleRow = document.querySelector('ytd-watch-metadata #middle-row');
+      if (middleRow) return { el: middleRow, mode: 'in-middle-row' };
+  
+      // 4) Player overlay fallback
+      if (player) return { el: player, mode: 'overlay' };
+      return null;
     }
-
+  
+    function ensurePanel(anchorObj) {
+      if (!anchorObj) return null;
+      const { el, mode } = anchorObj;
+  
+      let panel = document.getElementById('tm-video-info');
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'tm-video-info';
+        panel.setAttribute('role', 'group');
+  
+        // Base styles
+        Object.assign(panel.style, {
+          zIndex: '1000',
+          padding: '6px 8px',
+          color: '#fff',
+          backgroundColor: 'rgba(18,18,18,.85)',
+          border: '1px solid #3d3d3d',
+          borderRadius: '8px',
+          whiteSpace: 'pre',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '12px',
+          lineHeight: '16px',
+          maxWidth: 'min(460px, 50vw)'
+        });
+  
+        const textSpan = document.createElement('span');
+        textSpan.setAttribute('data-custom-text', 'video-info');
+        panel.appendChild(textSpan);
+  
+        const label = document.createElement('label');
+        Object.assign(label.style, { display: 'inline-flex', alignItems: 'center', cursor: 'pointer', color: '#fff' });
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.style.marginRight = '6px';
+        cb.checked = alwaysPlay;
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode('Always Play'));
+        panel.appendChild(label);
+      }
+  
+      // Placement and style per mode
+      if (mode === 'after-subscribe') {
+        if (panel.parentElement !== el.parentElement || panel.previousElementSibling !== el) {
+          el.insertAdjacentElement('afterend', panel); // precise placement beside subscribe [web:43]
+        }
+        Object.assign(panel.style, { position: 'static', marginLeft: '8px', marginTop: '0', pointerEvents: 'auto' });
+      } else if (mode === 'in-top-row' || mode === 'in-middle-row') {
+        if (panel.parentElement !== el) el.appendChild(panel);
+        Object.assign(panel.style, { position: 'static', marginTop: '8px', pointerEvents: 'auto' });
+      } else {
+        // overlay on player
+        if (panel.parentElement !== el) el.appendChild(panel);
+        Object.assign(panel.style, { position: 'absolute', bottom: '56px', left: '12px', pointerEvents: 'none' });
+        if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+      }
+  
+      return panel;
+    }
+  
     function getVideoInfo(video, player) {
-        if (video && !isNaN(video.currentTime)) {
-            const time = video.currentTime;
-            const status = !(video.paused);
-            const speed = video.playbackRate.toFixed(2);
-            const quality = player.getPlaybackQuality();
-            const isTheaterMode = document.querySelector('ytd-watch-flexy[theater]') !== null;
-            const isFullScreen = document.querySelector('ytd-watch-flexy[fullscreen]') !== null;
-            const mode = isFullScreen ? 'Full Screen' : isTheaterMode ? 'Theater' : 'Default';
-            return {
-                "url": window.location.href.split('&')[0],
-                "time": time,
-                "status": status,
-                "speed": speed,
-                "quality": quality,
-                "mode": mode,
-            };
-        }
+      if (!video || isNaN(video.currentTime)) return null;
+      const time = video.currentTime;
+      const status = !video.paused;
+      const speed = video.playbackRate.toFixed(2);
+      const quality = player && typeof player.getPlaybackQuality === 'function' ? player.getPlaybackQuality() : '';
+      const isTheater = document.querySelector('ytd-watch-flexy[theater]') !== null;
+      const isFull = document.querySelector('ytd-watch-flexy[fullscreen]') !== null;
+      const mode = isFull ? 'Full Screen' : (isTheater ? 'Theater' : 'Default');
+      return { url: location.href.split('&')[0], time, status, speed, quality, mode };
     }
-
-    function setVideoInfo(video, player, setting) {
-        if (!video || !player) {
-            console.log('Video or player element not found');
-            return false;
-        }
-        try {
-            video.currentTime = setting.time;
-            video.play();
-            video.playbackRate = setting.speed;
-            player.setPlaybackQuality(setting.quality);
-            const watchFlexy = document.querySelector('ytd-watch-flexy');
-            if (setting.mode == "Full Screen") {
-                player.enterFullScreen();
-            } else if (setting.mode == "Theater") {
-                const theaterButton = document.querySelector('.ytp-size-button');
-                if (theaterButton) theaterButton.click();
-            } else if (setting.mode == "Default") {
-                player.exitFullScreen();
-            }
-        } catch (e) {
-            console.log(e);
-        }
+  
+    function setVideoInfo(video, player, info) {
+      if (!video || !player || !info) return;
+      try {
+        video.currentTime = info.time || 0;
+        if (info.speed) video.playbackRate = Number(info.speed) || 1.0;
+        if (info.quality && typeof player.setPlaybackQuality === 'function') player.setPlaybackQuality(info.quality);
+        if (info.mode === 'Full Screen' && typeof player.enterFullScreen === 'function') player.enterFullScreen();
+        else if (info.mode === 'Theater') {
+          const btn = document.querySelector('.ytp-size-button');
+          if (btn) btn.click();
+        } else if (info.mode === 'Default' && typeof player.exitFullScreen === 'function') player.exitFullScreen();
+        video.play().catch(() => {});
+      } catch {}
     }
-
-    function checkPageLoadTime(video, player, currentUrl) {
-        if (currentUrl !== previousUrl) {
-            previousUrl = currentUrl;
-            let loadCount = parseInt(localStorage.getItem(currentUrl + '_loadCount') || '0', 10);
-            loadCount++;
-            localStorage.setItem(currentUrl + '_loadCount', loadCount);
-
-            const storedInfo = localStorage.getItem(currentUrl + '_videoInfo');
-            if (storedInfo) {
-                try {
-                    const parsedInfo = JSON.parse(storedInfo);
-                    if (video && player) {
-                        setVideoInfo(video, player, parsedInfo);
-                    }
-                } catch (e) {
-                    console.error('Error parsing stored video info:', e);
-                }
-            }
+  
+    function onUrlChange(video, player) {
+      const currentUrl = location.href.split('&')[0];
+      if (currentUrl !== previousUrl) {
+        previousUrl = currentUrl;
+        const k = currentUrl + '_loadCount';
+        localStorage.setItem(k, String((parseInt(localStorage.getItem(k) || '0', 10)) + 1));
+        const stored = localStorage.getItem(currentUrl + '_videoInfo');
+        if (stored) {
+          try { setVideoInfo(video, player, JSON.parse(stored)); } catch {}
         }
+      }
     }
-
-    function oldstoreVideoInfo(url, info) {
-        try {
-            localStorage.setItem(url + '_videoInfo', JSON.stringify(info));
-        } catch (e) {
-            console.error('Error storing video info:', e);
-        }
-    }
-
+  
     function storeVideoInfo(url, info) {
-    try {
-        // Store the new video info
+      try {
         localStorage.setItem(url + '_videoInfo', JSON.stringify(info));
-
-        // Track all video info keys
-        const videoKeys = Object.keys(localStorage).filter(key => key.endsWith('_videoInfo'));
+        const videoKeys = Object.keys(localStorage).filter(k => k.endsWith('_videoInfo'));
         const maxVideos = 20;
-
-        // If more than 20 video info entries exist, remove the oldest
         if (videoKeys.length > maxVideos) {
-            // Sort keys by load count to identify the oldest (lowest load count)
-            const sortedKeys = videoKeys.sort((a, b) => {
-                const loadCountA = parseInt(localStorage.getItem(a.replace('_videoInfo', '_loadCount')) || '0', 10);
-                const loadCountB = parseInt(localStorage.getItem(b.replace('_videoInfo', '_loadCount')) || '0', 10);
-                return loadCountA - loadCountB; // Oldest has lowest load count
-            });
-
-            // Remove the oldest video info and its load count
-            const oldestKey = sortedKeys[0];
-            localStorage.removeItem(oldestKey); // Remove video info
-            localStorage.removeItem(oldestKey.replace('_videoInfo', '_loadCount')); // Remove associated load count
+          const sorted = videoKeys.sort((a, b) =>
+            (parseInt(localStorage.getItem(a.replace('_videoInfo', '_loadCount')) || '0', 10)) -
+            (parseInt(localStorage.getItem(b.replace('_videoInfo', '_loadCount')) || '0', 10)));
+          const oldest = sorted[0];
+          localStorage.removeItem(oldest);
+          localStorage.removeItem(oldest.replace('_videoInfo', '_loadCount'));
         }
-    } catch (e) {
-        console.error('Error storing video info:', e);
+      } catch {}
     }
-}
-
-    const mainFunc = setInterval(function() {
-        const video = document.querySelector('video');
+  
+    function observeMetadata() {
+      const meta = document.querySelector('ytd-watch-metadata') || document.body;
+      const mo = new MutationObserver(() => {
         const player = document.querySelector('.html5-video-player');
-        const targetXPath = '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[2]/ytd-watch-metadata/div/div[2]/div[1]';
-        if (video && player) {
-            const info = getVideoInfo(video, player);
-            containerInfoBlk(targetXPath, player, info);
-            //const currentUrl = window.location.href.split('&')[0];
-            //checkPageLoadTime(video, player, currentUrl);
-            //storeVideoInfo(currentUrl, info);
-
-            const alwaysPlayCheckbox = document.querySelector('div[data-custom-text="video-time"] input[type="checkbox"]');
-            if (alwaysPlayCheckbox) {
-                alwaysPlay = alwaysPlayCheckbox.checked; // Sync with checkbox
-                //localStorage.setItem('alwaysPlay', alwaysPlay); // Update localStorage
-
-                if (alwaysPlay) {
-                    video.play().catch(error => {
-                        console.error('Failed to play video:', error);
-                    });
-                    // Add pause handler to enforce always play
-                    const handlePause = () => {
-                        if (alwaysPlayCheckbox.checked) {
-                            video.play().catch(error => {
-                                console.error('Pause handler failed to play video:', error);
-                            });
-                        }
-                    };
-                    video.removeEventListener('pause', handlePause);
-                    video.addEventListener('pause', handlePause);
-                } else {
-                    if (!hasFirstUntickOccurred && !video.paused) {
-                        video.pause();
-                        hasFirstUntickOccurred = true;
-                        //localStorage.setItem('hasFirstUntickOccurred', 'true');
-                    }
-                    // Remove pause handler when alwaysPlay is off
-                    video.removeEventListener('pause', () => video.play());
-                }
-            }
+        const anchorObj = resolveAnchor(player);
+        if (!anchorObj) return;
+        const panel = ensurePanel(anchorObj);
+        if (!panel) return;
+        // If subscribe button appears later, snap panel after it
+        if (anchorObj.mode !== 'after-subscribe') {
+          const sb = document.querySelector('ytd-video-owner-renderer #subscribe-button, ytd-watch-metadata #subscribe-button');
+          if (sb && panel.previousElementSibling !== sb) sb.insertAdjacentElement('afterend', panel);
         }
-    }, 100);
-
-    window.addEventListener('beforeunload', function() {
-        clearInterval(mainFunc);
-    });
-})();
+      });
+      mo.observe(meta, { childList: true, subtree: true }); // robust against Polymer re-renders [web:61]
+    }
+  
+    const main = setInterval(() => {
+      const video = document.querySelector('video');
+      const player = document.querySelector('.html5-video-player');
+      if (!video || !player) return;
+  
+      onUrlChange(video, player);
+  
+      const info = getVideoInfo(video, player);
+      if (!info) return;
+  
+      const anchorObj = resolveAnchor(player);
+      const panel = ensurePanel(anchorObj || {});
+      if (panel) {
+        const infoSpan = panel.querySelector('span[data-custom-text="video-info"]');
+        const m = Math.floor(info.time / 60);
+        const s = Math.floor(info.time % 60).toString().padStart(2, '0');
+        const q = QUALITY_MAP[info.quality] || info.quality || '';
+        const st = info.status ? 'Is Playing' : 'Is Paused';
+        if (infoSpan) infoSpan.textContent = `Time: ${m}:${s} - ${st} - Speed: ${info.speed}x\nResolution: ${q} - Mode: ${info.mode}`;
+      }
+  
+      const secKey = Math.floor(info.time);
+      const lastSec = Number(localStorage.getItem(info.url + '_lastStoredSec') || '-1');
+      if (secKey !== lastSec) {
+        storeVideoInfo(info.url, info);
+        localStorage.setItem(info.url + '_lastStoredSec', String(secKey));
+      }
+  
+      const cb = document.querySelector('#tm-video-info input[type="checkbox"]');
+      if (cb) {
+        alwaysPlay = cb.checked;
+        localStorage.setItem('alwaysPlay', alwaysPlay ? 'true' : 'false');
+        if (alwaysPlay) {
+          video.play().catch(() => {});
+          const handler = () => { if (cb.checked) video.play().catch(() => {}); };
+          if (video._tmHandlePause) video.removeEventListener('pause', video._tmHandlePause);
+          video._tmHandlePause = handler;
+          video.addEventListener('pause', handler);
+        } else {
+          if (!hasFirstUntickOccurred && !video.paused) {
+            video.pause();
+            hasFirstUntickOccurred = true;
+            localStorage.setItem('hasFirstUntickOccurred', 'true');
+          }
+          if (video._tmHandlePause) {
+            video.removeEventListener('pause', video._tmHandlePause);
+            delete video._tmHandlePause;
+          }
+        }
+      }
+    }, 200);
+  
+    observeMetadata();
+  
+    window.addEventListener('beforeunload', () => clearInterval(main));
+  })();
+  
