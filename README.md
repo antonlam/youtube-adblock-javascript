@@ -10,6 +10,8 @@ A powerful collection of Tampermonkey userscripts that enhance your YouTube expe
 ### 1. YouTube Adblock v4 (`YouTube Adblock video.js`)
 Blocks YouTube ads, removes various advertising elements, and automatically dismisses adblock warning popups.
 
+https://greasyfork.org/zh-TW/scripts/550443-youtube-adblock-v4 
+
 ### 2. Display Info v4 (`Display-Info.js`)
 Displays real-time video information and provides auto-play functionality with persistent settings.
 
