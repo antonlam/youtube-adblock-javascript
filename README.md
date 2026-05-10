@@ -10,7 +10,7 @@ A powerful collection of Tampermonkey userscripts that enhance your YouTube expe
 ### 1. YouTube Adblock v4 (`YouTube Adblock video.js`)
 Blocks YouTube ads, removes various advertising elements, and automatically dismisses adblock warning popups.
 
-https://greasyfork.org/zh-TW/scripts/550443-youtube-adblock-v4 
+[https://greasyfork.org/scripts/550443](https://greasyfork.org/scripts/550443)
 
 ### 2. Display Info v4 (`Display-Info.js`)
 Displays real-time video information and provides auto-play functionality with persistent settings.
@@ -28,9 +28,10 @@ Displays real-time video information and provides auto-play functionality with p
 
 ### Prerequisites
 - **Tampermonkey / Userscript** browser extension installed
+  
   - [Chrome/Edge](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
   - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
-  - [Safari](https://apps.apple.com/us/app/tampermonkey/id1482490089](https://apps.apple.com/us/app/userscripts/id1463298887 )
+  - [Safari](https://apps.apple.com/us/app/tampermonkey/id1482490089)
 
 ### Setup Instructions
 
@@ -185,7 +186,7 @@ Both scripts are optimized for minimal performance impact:
 - **Script Version**: 4.0 (2025-09-21)
 - **Update Frequency**: 500ms
 - **Grant Permissions**: None (runs in page context)
-- **Namespace**: http://tampermonkey.net/
+- **Namespace**: [https://tampermonkey.net](https://tampermonkey.net)
 - **License**: MIT
 - **Features**: Anti-detection, player status monitoring, adblock warning removal
 
@@ -193,7 +194,7 @@ Both scripts are optimized for minimal performance impact:
 - **Script Version**: 4.0 (2025-09-21)
 - **Update Frequency**: 100ms
 - **Grant Permissions**: None (runs in page context)
-- **Namespace**: http://tampermonkey.net/
+- **Namespace**: [https://tampermonkey.net](https://tampermonkey.net)
 - **Storage**: Uses localStorage for settings persistence
 - **Features**: Real-time info display, auto-play control, XPath targeting
 
@@ -250,4 +251,5 @@ For issues, questions, or contributions:
 
 ---
 
-**Note**: These scripts work by modifying YouTube's interface on the client side. Always ensure you're using them responsibly and in accordance with your local laws and YouTube's terms of service.
+> [!NOTE]
+> These scripts work by modifying YouTube's interface on the client side. Always ensure you're using them responsibly and in accordance with your local laws and YouTube's terms of service.
