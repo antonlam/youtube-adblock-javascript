@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Speed Panel Extension
 // @namespace    http://tampermonkey.net/
-// @version      2026-08-09
+// @version      1.3
 // @description  Extend YouTube's variable speed panel with extra presets and a 10x slider, with minimal overhead.
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -24,10 +24,7 @@
   }
 
   function getVideo() {
-    const v =
-      document.querySelector('video.html5-main-video') ||
-      document.querySelector('video');
-    return v;
+    return document.querySelector('video.html5-main-video') || document.querySelector('video');
   }
 
    function injectStyles() {
@@ -181,24 +178,11 @@
 
    function updateSpeedWording(content, speed) {
         const text = `${Number(speed).toFixed(2)}x`;
+        const mainDisplay = content.querySelector('.ytp-variable-speed-panel-display > span');
+        const sliderDisplay = content.querySelector('.ytp-speedslider-text');
 
-        // Large readout at the top of the speed panel, e.g. "1.50x"
-        const mainDisplay = content.querySelector(
-            '.ytp-variable-speed-panel-display > span'
-        );
-
-        // Label above the slider thumb
-        const sliderDisplay = content.querySelector(
-            '.ytp-speedslider-text'
-        );
-
-        if (mainDisplay) {
-            mainDisplay.textContent = text;
-        }
-
-        if (sliderDisplay) {
-            sliderDisplay.textContent = text;
-        }
+        if (mainDisplay)  mainDisplay.textContent = text;
+        if (sliderDisplay)  sliderDisplay.textContent = text;
     }
 
   function patchPresetChips(content) {
@@ -231,7 +215,6 @@
         if (!v) return;
         v.playbackRate = speed;
         v.dispatchEvent(new Event('ratechange'));
-
       const slider = content.querySelector('input.ytp-varispeed-input-slider.ytp-input-slider');
           if (!slider) {
               log('patchSlider(): slider not found');
@@ -239,7 +222,7 @@
           }
       slider.value = speed;
 
-      updateSpeedWording(document, speed);
+      updateSpeedWording(content, speed);
 
         log('extra chip clicked', speed);
       });
@@ -301,7 +284,7 @@
     setupObserver();
   });
 
-   window.addEventListener('yt-navigate-finish', () => {
+  window.addEventListener('yt-navigate-finish', () => {
     injectStyles();
   });
 })();
