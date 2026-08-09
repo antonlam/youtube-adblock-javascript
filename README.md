@@ -1,9 +1,13 @@
-﻿# YouTube Enhancement Suite - Tampermonkey Scripts
+﻿﻿# YouTube Enhancement Suite - Tampermonkey Scripts
 
 A powerful collection of Tampermonkey userscripts that enhance your YouTube experience by blocking ads, displaying video information, and providing auto-play functionality.
 
 ## **Never pop up again ↓**<br>
-<img width="568" height="324" alt="image" src="https://github.com/user-attachments/assets/700837fd-7b53-4bc6-9b0c-71ab69be0f40" />
+<img width="568" height="324" alt="image of Youtube adblock" src="https://github.com/user-attachments/assets/700837fd-7b53-4bc6-9b0c-71ab69be0f40" />
+
+## **Customized speed control panel↓**<br>
+<img width="568" height="324" alt="image of custom speed panel" src="https://github.com/user-attachments/assets/9619509e-e9ac-454d-9799-3e9ccb280d5c" />
+
 
 ## Scripts Overview
 
@@ -15,10 +19,14 @@ https://greasyfork.org/zh-TW/scripts/550443-youtube-adblock-v4
 ### 2. Display Info v4 (`Display-Info.js`)
 Displays real-time video information and provides auto-play functionality with persistent settings.
 
+### 3. YouTube Speed Panel Extension (`YouTube Speed Panel Extension.js`)
+Extends YouTube's built-in speed panel with extra presets and a wider slider for speeds up to 16x.
+
 ## Combined Features
 
 - **Complete Ad Blocking**: Removes all types of YouTube advertisements
 - **Real-time Video Info**: Shows current time, playback status, speed, quality, and viewing mode
+- **Extended Speed Controls**: Adds extra playback presets and a 10x-friendly slider in the native speed panel
 - **Auto-play Control**: Optional feature to automatically resume paused videos
 - **Premium Prompt Removal**: Eliminates YouTube Premium subscription prompts
 - **Visual Enhancement**: Clean interface with customizable information display
@@ -41,14 +49,15 @@ Displays real-time video information and provides auto-play functionality with p
 4. Copy and paste the contents of `YouTube Adblock video.js`
 5. Save the script (Ctrl+S)
 6. Repeat steps 3-5 for `Display-Info.js`
-7. Navigate to YouTube and enjoy enhanced viewing!
+7. Repeat steps 3-5 for `YouTube Speed Panel Extension.js`
+8. Navigate to YouTube and enjoy enhanced viewing!
 
 #### Method 2: Bulk Installation
 1. Install Tampermonkey / Userscript extension
 2. Open Tampermonkey dashboard
 3. Click "Create a new script" for each file
-4. Copy and paste both scripts
-5. Save both scripts
+4. Copy and paste all three scripts
+5. Save all scripts
 6. Refresh YouTube page
 
 ## Script Details
@@ -104,6 +113,14 @@ Displays real-time video information and provides auto-play functionality with p
 - **Clean Typography**: Easy-to-read white text on dark background (#121212)
 - **Integrated Controls**: Checkbox for auto-play functionality
 - **Flexbox Layout**: Modern CSS layout for better alignment
+
+### YouTube Speed Panel Extension Features
+
+#### Speed Panel Enhancements
+- **Extra Presets**: Adds additional playback speeds such as 3x, 5x, 7x, 9x, and 10x
+- **Extended Slider Range**: Expands the native slider to support speeds up to 16x
+- **Native Panel Integration**: Works within YouTube's existing variable-speed popup for a consistent experience
+- **Live UI Updates**: Keeps the visible speed readout and slider value in sync with the current playback rate
 
 ## Configuration Options
 
@@ -196,6 +213,12 @@ Both scripts are optimized for minimal performance impact:
 - **Namespace**: http://tampermonkey.net/
 - **Storage**: Uses localStorage for settings persistence
 - **Features**: Real-time info display, auto-play control, XPath targeting
+
+### YouTube Speed Panel Extension
+- **Script Version**: 1.3
+- **Grant Permissions**: None (runs in page context)
+- **Namespace**: http://tampermonkey.net/
+- **Features**: Extra speed presets, expanded slider range, native speed panel integration
 
 ## Contributing
 
