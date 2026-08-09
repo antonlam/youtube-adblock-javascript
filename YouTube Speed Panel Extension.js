@@ -1,26 +1,25 @@
 // ==UserScript==
 // @name         YouTube Speed Panel Extension
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @author       Anton
+// @version      2026-08-09
 // @description  Extend YouTube's variable speed panel with extra presets and a 10x slider, with minimal overhead.
 // @match        https://www.youtube.com/*
 // @grant        none
 // ==/UserScript==
 
-
 (function () {
   'use strict';
 
-  const DEBUG = true;
-  const EXTRA_SPEEDS = [3.0, 5.0, 7.0, 9.0, 10.0];
-  const SLIDER_MIN = 0.25;
-  const SLIDER_MAX = 10;
-  const SLIDER_STEP = 0.05;
-  const STYLE_ID = 'yt-speed-panel-two-row-native-style';
+  const config = {
+    debug: false,
+    extraSpeeds: [3.0, 5.0, 7.0, 9.0, 10.0],
+    sliderMin: 0.25,
+    sliderMax: 16,
+    sliderStep: 0.05,
+  };
 
   function log(...args) {
-    if (!DEBUG) return;
+    if (!config.debug) return;
     console.log('[YT-Speed-Panel-Ext]', ...args);
   }
 
@@ -32,12 +31,12 @@
   }
 
    function injectStyles() {
-    if (document.getElementById(STYLE_ID)) {
+    if (document.getElementById('yt-speed-panel-two-row-native-style')) {
       return;
     }
 
     const style = document.createElement('style');
-    style.id = STYLE_ID;
+    style.id = 'yt-speed-panel-two-row-native-style';
 
     style.textContent = `
       /*
@@ -109,6 +108,12 @@
         margin-left: 3px !important;
       }
 
+      .ytp-variable-speed-panel-preset-button-label-text {
+       visibility: hidden !important;
+        pointer-events: none !important;
+        display: none !important;
+      }
+
       .ytp-variable-speed-panel-preset-button-wrapper:has(
         .ytp-variable-speed-panel-premium-upsell-icon
       ) {
@@ -149,9 +154,9 @@
       return;
     }
 
-    slider.min = String(SLIDER_MIN);
-    slider.max = String(SLIDER_MAX);
-    slider.step = String(SLIDER_STEP);
+    slider.min = String(config.sliderMin);
+    slider.max = String(config.sliderMax);
+    slider.step = String(config.sliderStep);
 
     const indicatorText = content.querySelector('.ytp-speedslider-text');
 
@@ -206,7 +211,7 @@
     // Remove previous extras for this open
     chipsContainer.querySelectorAll('.ytp-variable-speed-panel-extra-chip').forEach(el => el.remove());
 
-    EXTRA_SPEEDS.forEach(speed => {
+    config.extraSpeeds.forEach(speed => {
       const wrapper = document.createElement('div');
       wrapper.className = 'ytp-variable-speed-panel-preset-button-wrapper ytp-variable-speed-panel-extra-chip';
       wrapper.setAttribute('aria-hidden', 'false');
