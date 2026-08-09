@@ -2,7 +2,7 @@
 // @name         Youtube-Adblock v5.0
 // @namespace    http://tampermonkey.net/
 // @version      2026-08-09
-// @description  Youtube Adblock v4
+// @description  Youtube Adblock v5
 // @author       Anton
 // @match        *://*.youtube.com/*
 // @exclude      *://accounts.youtube.com/*
@@ -32,19 +32,19 @@
 
     // Array of CSS selectors for different types of YouTube ads to block
     var cssArrObject = [
-        `#masthead-ad`,                                                                    // Top banner ads
+        `#masthead-ad`, // Top banner ads
         `ytd-rich-item-renderer.style-scope.ytd-rich-grid-row #content:has(.ytd-display-ad-renderer)`, // Rich grid display ads
-        `.video-ads.ytp-ad-module`,                                                       // Video overlay ads
-        `tp-yt-paper-dialog:has(yt-mealbar-promo-renderer)`,                             // Mealbar promo dialogs
+        `.video-ads.ytp-ad-module`, // Video overlay ads
+        `tp-yt-paper-dialog:has(yt-mealbar-promo-renderer)`, // Mealbar promo dialogs
         `ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"]`, // Engagement panel ads
-        `#related #player-ads`,                                                           // Related video ads
-        `#related ytd-ad-slot-renderer`,                                                 // Related ad slots
-        `ytd-ad-slot-renderer`,                                                          // General ad slot renderers
-        `yt-mealbar-promo-renderer`,                                                     // Mealbar promo renderers
-        `ytd-popup-container:has(a[href="/premium"])`,                                   // Premium subscription popups
-        `ad-slot-renderer`,                                                              // Generic ad slot renderers
-        `ytm-companion-ad-renderer`,                                                     // Companion ads (mobile)
-        `#related #-ad-`,                                                                // Related section ads
+        `#related #player-ads`, // Related video ads
+        `#related ytd-ad-slot-renderer`, // Related ad slots
+        `ytd-ad-slot-renderer`, // General ad slot renderers
+        `yt-mealbar-promo-renderer`, // Mealbar promo renderers
+        `ytd-popup-container:has(a[href="/premium"])`, // Premium subscription popups
+        `ad-slot-renderer`, // Generic ad slot renderers
+        `ytm-companion-ad-renderer`, // Companion ads (mobile)
+        `#related #-ad-`, // Related section ads
     ];
 
 
@@ -81,6 +81,10 @@
         let style = document.createElement(`style`);
         (document.head || document.body).appendChild(style); // Add to document head or body
         style.appendChild(document.createTextNode(arry.join(` `))); // Join all CSS rules with spaces
+
+        // Remove empty box at the thumbnail main page
+        const emptyBox = 'ytd-rich-item-renderer:has(> #content > ytd-ad-slot-renderer)';
+        document.querySelectorAll(emptyBox).forEach(item => item.remove());
     }
 
     /**
