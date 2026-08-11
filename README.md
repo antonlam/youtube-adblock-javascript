@@ -22,11 +22,15 @@ Displays real-time video information and provides auto-play functionality with p
 ### 3. YouTube Speed Panel Extension (`YouTube Speed Panel Extension.js`)
 Extends YouTube's built-in speed panel with extra presets and a wider slider for speeds up to 16x.
 
+### 4. Remove YouTube Shorts (`YouTube Remove Short.js`)
+Removes Shorts shelves, redirects `/shorts/` links to standard watch pages, and hides Shorts entry points across YouTube.
+
 ## Combined Features
 
 - **Complete Ad Blocking**: Removes all types of YouTube advertisements
 - **Real-time Video Info**: Shows current time, playback status, speed, quality, and viewing mode
 - **Extended Speed Controls**: Adds extra playback presets and a 10x-friendly slider in the native speed panel
+- **Shorts Removal**: Removes Shorts shelves, Shorts tabs, and Shorts navigation entry points
 - **Auto-play Control**: Optional feature to automatically resume paused videos
 - **Premium Prompt Removal**: Eliminates YouTube Premium subscription prompts
 - **Visual Enhancement**: Clean interface with customizable information display
@@ -50,13 +54,14 @@ Extends YouTube's built-in speed panel with extra presets and a wider slider for
 5. Save the script (Ctrl+S)
 6. Repeat steps 3-5 for `Display-Info.js`
 7. Repeat steps 3-5 for `YouTube Speed Panel Extension.js`
-8. Navigate to YouTube and enjoy enhanced viewing!
+8. Repeat steps 3-5 for `YouTube Remove Short.js`
+9. Navigate to YouTube and enjoy enhanced viewing!
 
 #### Method 2: Bulk Installation
 1. Install Tampermonkey / Userscript extension
 2. Open Tampermonkey dashboard
 3. Click "Create a new script" for each file
-4. Copy and paste all three scripts
+4. Copy and paste all four scripts
 5. Save all scripts
 6. Refresh YouTube page
 
@@ -121,6 +126,21 @@ Extends YouTube's built-in speed panel with extra presets and a wider slider for
 - **Extended Slider Range**: Expands the native slider to support speeds up to 16x
 - **Native Panel Integration**: Works within YouTube's existing variable-speed popup for a consistent experience
 - **Live UI Updates**: Keeps the visible speed readout and slider value in sync with the current playback rate
+
+### Remove YouTube Shorts Features
+
+#### Shorts Removal Capabilities
+- **Shorts Shelf Removal**: Hides Shorts shelves on home, subscriptions, and channel pages
+- **Shorts Link Redirects**: Redirects `/shorts/` URLs to normal watch pages when possible
+- **Navigation Cleanup**: Removes Shorts entries from the sidebar, mini guide, and mobile bottom nav
+- **Search Cleanup**: Removes Shorts results, chips, and shelf-style shortcuts from search pages
+- **Channel Tab Cleanup**: Hides Shorts tabs on channel pages and leaves Shorts subpages
+
+#### Technical Implementation
+- **CSS Injection**: Injects early display rules to hide Shorts containers before they flash
+- **DOM Removal**: Removes Shorts shelves and wrapper containers as YouTube renders them
+- **Route Monitoring**: Re-runs cleanup on YouTube SPA navigation events
+- **Optional API Blocking**: Can block selected Shorts reel API requests if enabled
 
 ## Configuration Options
 
@@ -219,6 +239,12 @@ Both scripts are optimized for minimal performance impact:
 - **Grant Permissions**: None (runs in page context)
 - **Namespace**: http://tampermonkey.net/
 - **Features**: Extra speed presets, expanded slider range, native speed panel integration
+
+### Remove YouTube Shorts
+- **Script Version**: 1.0
+- **Grant Permissions**: None (runs in page context)
+- **Namespace**: http://tampermonkey.net/
+- **Features**: Shorts shelf removal, redirect support, sidebar cleanup, mobile cleanup
 
 ## Contributing
 
